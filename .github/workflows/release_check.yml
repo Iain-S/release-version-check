@@ -1,0 +1,29 @@
+---
+
+name: Release check
+
+
+on:
+  release:
+    # Publish on release
+    types:
+      - published
+
+jobs:
+  checkversion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Compare versions
+        run: |
+          PYPROJECT_VERSION=$(sed -n '3p' pyproject.toml | sed "s/version = //")
+          GITHUB_VERSION=${{ github.event.release.tag_name }}
+          if [[ "\"$PYPROJECT_VERSION\"" != '$GITHUB_VERSION' ]] 
+          then
+              echo "pyproject.toml version ($PYPROJECT_VERSION) doesn't match GitHub version($GITHUB_VERSION)"
+              exit 1
+          fi
+          
